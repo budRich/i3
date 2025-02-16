@@ -216,6 +216,8 @@ bool load_configuration(const char *override_configpath, config_load_t load_type
     config.default_floating_border = BS_NORMAL;
     config.default_border_width = logical_px(2);
     config.default_floating_border_width = logical_px(2);
+    config.default_border_fat = false;
+    config.default_floating_border_fat = false;
     /* Set default_orientation to NO_ORIENTATION for auto orientation. */
     config.default_orientation = NO_ORIENTATION;
 
@@ -234,6 +236,20 @@ bool load_configuration(const char *override_configpath, config_load_t load_type
 
     config.tiling_drag = TILING_DRAG_MODIFIER;
     config.swap_modifier = XCB_KEY_BUT_MASK_SHIFT;
+
+#define INIT_FAT_COLOR(x, cbase, clight, cdark_outer, cdark_inner) \
+    do {                                                           \
+        x.base = draw_util_hex_to_color(cbase);                    \
+        x.light = draw_util_hex_to_color(clight);                  \
+        x.dark_outer = draw_util_hex_to_color(cdark_outer);        \
+        x.dark_inner = draw_util_hex_to_color(cdark_inner);        \
+    } while (0)
+
+    INIT_FAT_COLOR(config.fat_border.focused,          "#D3CFC7", "#FEFEFE", "#404040", "#7F7F7F");
+    INIT_FAT_COLOR(config.fat_border.focused_inactive, "#D3CFC7", "#FEFEFE", "#404040", "#7F7F7F");
+    INIT_FAT_COLOR(config.fat_border.unfocused,        "#D3CFC7", "#FEFEFE", "#404040", "#7F7F7F");
+    INIT_FAT_COLOR(config.fat_border.urgent,           "#D3CFC7", "#FEFEFE", "#404040", "#7F7F7F");
+    config.fat_border.enabled = false;
 
     FREE(current_configpath);
     current_configpath = get_config_path(override_configpath, true);
