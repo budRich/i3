@@ -62,6 +62,8 @@ state INITIAL:
       -> COLOR_SINGLE
   colorclass = 'client.focused_inactive', 'client.focused_tab_title', 'client.focused', 'client.unfocused', 'client.urgent', 'client.placeholder'
       -> COLOR_BORDER
+  colorclass = 'fat_border.focused_inactive', 'fat_border.focused', 'fat_border.unfocused', 'fat_border.urgent'
+      -> FAT_BORDER_BASE
 
 # We ignore comments and 'set' lines (variables).
 state IGNORE_LINE:
@@ -162,10 +164,24 @@ state WORKSPACE_LAYOUT:
 # <default_border|new_window> <normal|1pixel|none>
 # <default_floating_border|new_float> <normal|1pixel|none>
 state DEFAULT_BORDER:
+  border = 'fat-normal', 'fat-pixel'
+      -> FAT_BORDER_PIXELS
   border = 'normal', 'pixel'
       -> DEFAULT_BORDER_PIXELS
   border = '1pixel', 'none'
       -> call cfg_default_border($windowtype, $border, -1)
+
+state FAT_BORDER_PIXELS:
+  end
+      -> call cfg_fat_border($windowtype, $border, 3)
+  width = number
+      -> FAT_BORDER_PIXELS_PX
+
+state FAT_BORDER_PIXELS_PX:
+  'px'
+      ->
+  end
+      -> call cfg_fat_border($windowtype, $border, &width)
 
 state DEFAULT_BORDER_PIXELS:
   end
@@ -421,6 +437,23 @@ state COLOR_CHILD_BORDER:
       -> call cfg_color($colorclass, $border, $background, $text, $indicator, $child_border)
   end
       -> call cfg_color($colorclass, $border, $background, $text, $indicator, NULL)
+
+# colorclass border background text indicator
+state FAT_BORDER_BASE:
+  base = word
+      -> FAT_BORDER_LIGHT
+
+state FAT_BORDER_LIGHT:
+  light = word
+      -> FAT_BORDER_DARK_OUTER
+
+state FAT_BORDER_DARK_OUTER:
+  dark_outer = word
+      -> FAT_BORDER_DARK_INNER
+
+state FAT_BORDER_DARK_INNER:
+  dark_inner = word
+      -> call cfg_fat_border_colors($colorclass, $base, $light, $dark_outer, $dark_inner)
 
 # <exec|exec_always> [--no-startup-id] command
 state EXEC:
