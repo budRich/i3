@@ -386,6 +386,30 @@ CFGFUN(workspace_layout, const char *layout) {
     }
 }
 
+CFGFUN(fat_border, const char *windowtype, const char *border, const long width) {
+    int border_style;
+    int border_width;
+
+    border_style = (strcmp(border, "fat-pixel") == 0) ? BS_PIXEL : BS_NORMAL;
+    border_width = width;
+
+    if ((strcmp(windowtype, "default_border") == 0) ||
+        (strcmp(windowtype, "new_window") == 0)) {
+        DLOG("default tiled border style = %d and border width = %d (%d physical px)\n",
+             border_style, border_width, logical_px(border_width));
+        config.default_border = border_style;
+        config.default_border_width = logical_px(border_width);
+        config.default_border_fat = true;
+    } else {
+        DLOG("default floating border style = %d and border width = %d (%d physical px)\n",
+             border_style, border_width, logical_px(border_width));
+        config.default_floating_border = border_style;
+        config.default_floating_border_width = logical_px(border_width);
+        config.default_floating_border_fat = true;
+    }
+}
+
+
 CFGFUN(default_border, const char *windowtype, const char *border, const long width) {
     int border_style;
     int border_width;
@@ -629,6 +653,28 @@ CFGFUN(color, const char *colorclass, const char *border, const char *background
 
 #undef APPLY_COLORS
 }
+
+/** base, light, dark_outer, dark_inner */
+CFGFUN(fat_border_colors, const char *colorclass, const char *base, const char *light, const char *dark_outer, const char *dark_inner) {
+#define APPLY_COLORS(classname)                                                          \
+    do {                                                                                 \
+        if (strcmp(colorclass, "fat_border." #classname) == 0) {                         \
+            config.fat_border.classname.base = draw_util_hex_to_color(base);             \
+            config.fat_border.classname.light = draw_util_hex_to_color(light);           \
+            config.fat_border.classname.dark_outer = draw_util_hex_to_color(dark_outer); \
+            config.fat_border.classname.dark_inner = draw_util_hex_to_color(dark_inner); \
+            return;                                                                      \
+        }                                                                                \
+    } while (0)
+
+    APPLY_COLORS(focused_inactive);
+    APPLY_COLORS(focused);
+    APPLY_COLORS(unfocused);
+    APPLY_COLORS(urgent);
+
+#undef APPLY_COLORS
+}
+
 
 CFGFUN(assign_output, const char *output) {
     if (current_match->error != NULL) {

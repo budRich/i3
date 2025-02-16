@@ -219,6 +219,7 @@ struct width_height {
  */
 struct deco_render_params {
     struct Colortriple *color;
+    struct Fattriple *fat_color;
     int border_style;
     struct width_height con_rect;
     struct width_height con_window_rect;
@@ -226,6 +227,7 @@ struct deco_render_params {
     color_t background;
     layout_t parent_layout;
     bool con_is_leaf;
+    bool con_is_fat;
 };
 
 /**
