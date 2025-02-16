@@ -249,7 +249,6 @@ bool load_configuration(const char *override_configpath, config_load_t load_type
     INIT_FAT_COLOR(config.fat_border.focused_inactive, "#D3CFC7", "#FEFEFE", "#404040", "#7F7F7F");
     INIT_FAT_COLOR(config.fat_border.unfocused,        "#D3CFC7", "#FEFEFE", "#404040", "#7F7F7F");
     INIT_FAT_COLOR(config.fat_border.urgent,           "#D3CFC7", "#FEFEFE", "#404040", "#7F7F7F");
-    config.fat_border.enabled = false;
 
     FREE(current_configpath);
     current_configpath = get_config_path(override_configpath, true);
