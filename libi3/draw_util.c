@@ -248,6 +248,29 @@ void draw_util_image(cairo_surface_t *image, surface_t *surface, int x, int y, i
     cairo_restore(surface->cr);
 }
 
+void draw_util_cross(surface_t *surface, color_t color, double lineWidth, double x, double y, double w, double h) {
+    if (!surface_initialized(surface)) {
+        return;
+    }
+
+    cairo_save(surface->cr);
+
+    cairo_set_operator(surface->cr, CAIRO_OPERATOR_SOURCE);
+    draw_util_set_source_color(surface, color);
+
+    cairo_move_to (surface->cr, x, y);
+    cairo_line_to (surface->cr, x + w, y + h);
+    cairo_move_to (surface->cr, x + w, y);
+    cairo_line_to (surface->cr, x, y + h);
+    cairo_set_line_width (surface->cr, lineWidth);
+    cairo_stroke (surface->cr);
+
+    CAIRO_SURFACE_FLUSH(surface->surface);
+
+    cairo_restore(surface->cr);
+}
+
+
 /*
  * Draws a filled rectangle.
  * This function is a convenience wrapper and takes care of flushing the

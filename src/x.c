@@ -548,6 +548,7 @@ static void x_draw_decoration_after_title(Con *con, struct deco_render_params *p
     assert(con->parent != NULL);
 
     Rect *dr = &(con->deco_rect);
+    double btnSize =  10;
 
     /* Redraw the right border to cut off any text that went past it.
      * This is necessary when the text was drawn using XCB since cutting text off
@@ -561,6 +562,35 @@ static void x_draw_decoration_after_title(Con *con, struct deco_render_params *p
                             dr->y,
                             2 * logical_px(1),
                             dr->height);
+    }
+
+    // draw window controls
+    if  (p->show_window_controls && dr->width > 120) {
+        // close
+        draw_util_cross(dest_surface, config.window_controls_color, 2,
+            dr->x + dr->width - btnSize - 5,
+            dr->y + 6,
+            btnSize - 1,
+            btnSize - 1);
+
+        // restore
+        draw_util_rectangle(dest_surface, config.window_controls_color,
+                            dr->x + dr->width - 2 * btnSize - 2 * 5,
+                            dr->y + 6,
+                            btnSize,
+                            btnSize);
+        draw_util_rectangle(dest_surface, p->color->background,
+                            dr->x + 1 + dr->width - 2 * btnSize - 2 * 5,
+                            dr->y + 6 + 3,
+                            btnSize - 2,
+                            btnSize - 4);
+
+        // minimize
+        draw_util_rectangle(dest_surface, config.window_controls_color,
+                            dr->x + dr->width - 3 * btnSize - 3 * 5,
+                            dr->y + btnSize + 2,
+                            btnSize,
+                            3);
     }
 
     /* Redraw the border. */
@@ -693,6 +723,7 @@ void x_draw_decoration(Con *con) {
     p->background = config.client.background;
     p->con_is_leaf = con_is_leaf(con);
     p->parent_layout = con->parent->layout;
+    p->show_window_controls = (con == focused && config.show_window_controls);
     p->con_is_fat = con->parent->type != CT_FLOATING_CON
                         ? config.default_border_fat
                         : config.default_floating_border_fat;
@@ -969,7 +1000,7 @@ void x_draw_decoration(Con *con) {
                    p->color->text, p->color->background,
                    con->deco_rect.x + title_offset_x,
                    con->deco_rect.y + text_offset_y,
-                   deco_width - mark_width - 2 * title_padding - total_icon_space);
+                   deco_width - mark_width - 2 * title_padding - total_icon_space - (deco_width > 120 ? 40 : 0));
     if (has_icon) {
         draw_util_image(
             win->icon,

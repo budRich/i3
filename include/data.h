@@ -226,6 +226,7 @@ struct deco_render_params {
     Rect con_deco_rect;
     color_t background;
     layout_t parent_layout;
+    bool show_window_controls;
     bool con_is_leaf;
     bool con_is_fat;
 };
