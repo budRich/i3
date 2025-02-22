@@ -433,8 +433,8 @@ static void x_draw_title_border(Con *con, struct deco_render_params *p, surface_
 
         else if (con->parent->layout == L_STACKED && con_num_children(con->parent) > 1) {
             /* Left */
-            Con *above = get_tree_next_sibling(con, BEFORE);
-            Con *below = get_tree_next_sibling(con, AFTER);
+            Con *above = TAILQ_PREV(con, nodes_head, nodes);
+            Con *below = TAILQ_NEXT(con, nodes);
 
             if (above && above->parent == con->parent) {
 
