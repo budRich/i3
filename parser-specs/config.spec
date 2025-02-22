@@ -58,12 +58,19 @@ state INITIAL:
   'popup_during_fullscreen'                -> POPUP_DURING_FULLSCREEN
   'tiling_drag'                            -> TILING_DRAG
   exectype = 'exec_always', 'exec'         -> EXEC
-  colorclass = 'client.background'
+  colorclass = 'client.background', 'window_controls_color'
       -> COLOR_SINGLE
+  'window_controls'                        -> WINDOW_CONTROLS
   colorclass = 'client.focused_inactive', 'client.focused_tab_title', 'client.focused', 'client.unfocused', 'client.urgent', 'client.placeholder'
       -> COLOR_BORDER
   colorclass = 'fat_border.focused_inactive', 'fat_border.focused', 'fat_border.unfocused', 'fat_border.urgent'
       -> FAT_BORDER_BASE
+
+# window_controls
+state WINDOW_CONTROLS:
+  enabled = '1', 'yes', 'true', 'on', 'enable', 'active'
+    -> call cfg_window_controls($enabled)
+
 
 # We ignore comments and 'set' lines (variables).
 state IGNORE_LINE:

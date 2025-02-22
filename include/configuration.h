@@ -259,6 +259,9 @@ struct Config {
         bool got_focused_tab_title;
     } client;
 
+    color_t window_controls_color;
+    bool show_window_controls;
+
     struct config_bar {
         struct Colortriple focused;
         struct Colortriple unfocused;

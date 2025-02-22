@@ -210,6 +210,10 @@ bool load_configuration(const char *override_configpath, config_load_t load_type
     INIT_COLOR(config.bar.unfocused, "#333333", "#222222", "#888888", "#000000");
     INIT_COLOR(config.bar.urgent, "#2f343a", "#900000", "#ffffff", "#000000");
 
+    /* windowcontrols default color is same as default border color */
+    config.window_controls_color = draw_util_hex_to_color("#4c7899");
+    config.show_window_controls = false;
+
     config.show_marks = true;
 
     config.default_border = BS_NORMAL;

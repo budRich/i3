@@ -375,6 +375,10 @@ CFGFUN(default_orientation, const char *orientation) {
     }
 }
 
+CFGFUN(window_controls, const char *enabled) {
+    config.show_window_controls = boolstr(enabled);
+}
+
 CFGFUN(workspace_layout, const char *layout) {
     if (strcmp(layout, "default") == 0) {
         config.default_layout = L_DEFAULT;
@@ -615,8 +619,11 @@ CFGFUN(popup_during_fullscreen, const char *value) {
 }
 
 CFGFUN(color_single, const char *colorclass, const char *color) {
-    /* used for client.background only currently */
-    config.client.background = draw_util_hex_to_color(color);
+    if (strcmp(colorclass, "window_controls_color") == 0) {
+        config.window_controls_color = draw_util_hex_to_color(color);
+    } else {
+        config.client.background = draw_util_hex_to_color(color);
+    }
 }
 
 CFGFUN(color, const char *colorclass, const char *border, const char *background, const char *text, const char *indicator, const char *child_border) {
