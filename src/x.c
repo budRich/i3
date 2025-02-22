@@ -367,8 +367,8 @@ static void x_draw_title_border(Con *con, struct deco_render_params *p, surface_
 
         if (con->parent->layout == L_TABBED && con_num_children(con->parent) > 1) {
 
-            Con *lefter = get_tree_next_sibling(con, BEFORE);
-            Con *righter = get_tree_next_sibling(con, AFTER);
+            Con *lefter = TAILQ_PREV(con, nodes_head, nodes);
+            Con *righter = TAILQ_NEXT(con, nodes);
 
             /* Bottom is always single pixel base */
             draw_util_rectangle(dest_surface, p->fat_color->base,
