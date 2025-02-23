@@ -473,7 +473,9 @@ void handle_button_press(xcb_button_press_event_t *event) {
                 .height = child->deco_rect.height
             };
 
-            if ((child == focused || con_inside_focused(child)) && rect_contains(controls, event->event_x, event->event_y))
+            if ( (child == focused || con_inside_focused(child))
+                && child->deco_rect.width > 120
+                && rect_contains(controls, event->event_x, event->event_y))
                 route_click(child, event, CLICK_WINDOW_CONTROL);
             else
                 route_click(child, event, CLICK_DECORATION);
