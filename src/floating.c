@@ -405,6 +405,13 @@ bool floating_enable(Con *con, bool automatic) {
 
     DLOG("Floating rect: (%d, %d) with %d x %d\n", nc->rect.x, nc->rect.y, nc->rect.width, nc->rect.height);
 
+    /* To avoid having floating windows completely overlap, offset position */
+    Con *current = NULL;
+    TAILQ_FOREACH (current, &(ws->floating_head), floating_windows) {
+        nc->rect.x += 8;
+        nc->rect.y += 8;
+    }
+
     /* render the cons to get initial window_rect correct */
     render_con(nc);
 
