@@ -474,7 +474,8 @@ void manage_window(xcb_window_t window, xcb_get_window_attributes_cookie_t cooki
 
     /* set floating if necessary */
     bool want_floating = false;
-    if (xcb_reply_contains_atom(type_reply, A__NET_WM_WINDOW_TYPE_DIALOG) ||
+    if (config.spawn_floating ||
+        xcb_reply_contains_atom(type_reply, A__NET_WM_WINDOW_TYPE_DIALOG) ||
         xcb_reply_contains_atom(type_reply, A__NET_WM_WINDOW_TYPE_UTILITY) ||
         xcb_reply_contains_atom(type_reply, A__NET_WM_WINDOW_TYPE_TOOLBAR) ||
         xcb_reply_contains_atom(type_reply, A__NET_WM_WINDOW_TYPE_NOTIFICATION) ||

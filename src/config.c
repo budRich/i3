@@ -241,6 +241,8 @@ bool load_configuration(const char *override_configpath, config_load_t load_type
     config.tiling_drag = TILING_DRAG_MODIFIER;
     config.swap_modifier = XCB_KEY_BUT_MASK_SHIFT;
 
+    config.spawn_floating = false;
+
 #define INIT_FAT_COLOR(x, cbase, clight, cdark_outer, cdark_inner) \
     do {                                                           \
         x.base = draw_util_hex_to_color(cbase);                    \

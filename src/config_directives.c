@@ -385,6 +385,9 @@ CFGFUN(workspace_layout, const char *layout) {
     } else if (strcmp(layout, "stacking") == 0 ||
                strcmp(layout, "stacked") == 0) {
         config.default_layout = L_STACKED;
+    } else if (strcmp(layout, "floating") == 0) {
+        config.default_layout = L_DEFAULT;
+        config.spawn_floating = true;
     } else {
         config.default_layout = L_TABBED;
     }

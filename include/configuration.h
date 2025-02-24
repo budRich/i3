@@ -234,6 +234,8 @@ struct Config {
     bool default_border_fat;
     bool default_floating_border_fat;
 
+    bool spawn_floating;
+
     /** The modifier which needs to be pressed in combination with your mouse
      * buttons to do things with floating windows (move, resize) */
     uint32_t floating_modifier;
