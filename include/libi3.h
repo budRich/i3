@@ -630,6 +630,8 @@ void draw_util_image(cairo_surface_t *image, surface_t *surface, int x, int y, i
  */
 void draw_util_rectangle(surface_t *surface, color_t color, double x, double y, double w, double h);
 
+void draw_util_cross(surface_t *surface, color_t color, double lineWidth, double x, double y, double w, double h);
+
 /**
  * Clears a surface with the given color.
  *

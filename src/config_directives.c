@@ -381,16 +381,47 @@ CFGFUN(default_orientation, const char *orientation) {
     }
 }
 
+CFGFUN(window_controls, const char *enabled) {
+    config.show_window_controls = boolstr(enabled);
+}
+
 CFGFUN(workspace_layout, const char *layout) {
     if (strcmp(layout, "default") == 0) {
         config.default_layout = L_DEFAULT;
     } else if (strcmp(layout, "stacking") == 0 ||
                strcmp(layout, "stacked") == 0) {
         config.default_layout = L_STACKED;
+    } else if (strcmp(layout, "floating") == 0) {
+        config.default_layout = L_DEFAULT;
+        config.spawn_floating = true;
     } else {
         config.default_layout = L_TABBED;
     }
 }
+
+CFGFUN(fat_border, const char *windowtype, const char *border, const long width) {
+    int border_style;
+    int border_width;
+
+    border_style = (strcmp(border, "fat-pixel") == 0) ? BS_PIXEL : BS_NORMAL;
+    border_width = width;
+
+    if ((strcmp(windowtype, "default_border") == 0) ||
+        (strcmp(windowtype, "new_window") == 0)) {
+        DLOG("default tiled border style = %d and border width = %d (%d physical px)\n",
+             border_style, border_width, logical_px(border_width));
+        config.default_border = border_style;
+        config.default_border_width = logical_px(border_width);
+        config.default_border_fat = true;
+    } else {
+        DLOG("default floating border style = %d and border width = %d (%d physical px)\n",
+             border_style, border_width, logical_px(border_width));
+        config.default_floating_border = border_style;
+        config.default_floating_border_width = logical_px(border_width);
+        config.default_floating_border_fat = true;
+    }
+}
+
 
 CFGFUN(default_border, const char *windowtype, const char *border, const long width) {
     int border_style;
@@ -597,8 +628,11 @@ CFGFUN(popup_during_fullscreen, const char *value) {
 }
 
 CFGFUN(color_single, const char *colorclass, const char *color) {
-    /* used for client.background only currently */
-    config.client.background = draw_util_hex_to_color(color);
+    if (strcmp(colorclass, "window_controls_color") == 0) {
+        config.window_controls_color = draw_util_hex_to_color(color);
+    } else {
+        config.client.background = draw_util_hex_to_color(color);
+    }
 }
 
 CFGFUN(color, const char *colorclass, const char *border, const char *background, const char *text, const char *indicator, const char *child_border) {
@@ -635,6 +669,28 @@ CFGFUN(color, const char *colorclass, const char *border, const char *background
 
 #undef APPLY_COLORS
 }
+
+/** base, light, dark_outer, dark_inner */
+CFGFUN(fat_border_colors, const char *colorclass, const char *base, const char *light, const char *dark_outer, const char *dark_inner) {
+#define APPLY_COLORS(classname)                                                          \
+    do {                                                                                 \
+        if (strcmp(colorclass, "fat_border." #classname) == 0) {                         \
+            config.fat_border.classname.base = draw_util_hex_to_color(base);             \
+            config.fat_border.classname.light = draw_util_hex_to_color(light);           \
+            config.fat_border.classname.dark_outer = draw_util_hex_to_color(dark_outer); \
+            config.fat_border.classname.dark_inner = draw_util_hex_to_color(dark_inner); \
+            return;                                                                      \
+        }                                                                                \
+    } while (0)
+
+    APPLY_COLORS(focused_inactive);
+    APPLY_COLORS(focused);
+    APPLY_COLORS(unfocused);
+    APPLY_COLORS(urgent);
+
+#undef APPLY_COLORS
+}
+
 
 CFGFUN(assign_output, const char *output) {
     if (current_match->error != NULL) {

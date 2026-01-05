@@ -13,7 +13,8 @@
 
 typedef enum { CLICK_BORDER = 0,
                CLICK_DECORATION = 1,
-               CLICK_INSIDE = 2 } click_destination_t;
+               CLICK_INSIDE = 2,
+               CLICK_WINDOW_CONTROL = 3 } click_destination_t;
 
 /*
  * Finds the correct pair of first/second cons between the resize will take
@@ -229,6 +230,27 @@ static void route_click(Con *con, xcb_button_press_event_t *event, const click_d
                             event->detail == XCB_BUTTON_SCROLL_LEFT ||
                             event->detail == XCB_BUTTON_SCROLL_RIGHT);
 
+    /* 0: clicking window controls */
+    if (is_left_click && dest == CLICK_WINDOW_CONTROL) {
+        char *command;
+        if (event->event_x > con->deco_rect.x + con->deco_rect.width - 15)
+            command = sstrdup("kill");
+        else if (event->event_x > con->deco_rect.x + con->deco_rect.width - 35)
+            command = sstrdup("exec --no-startup-id i3fyra -a");
+        else {
+            sasprintf(&command, "exec --no-startup-id i3run --silent -n %llu",con);
+        }
+
+        CommandResult *result = parse_command(command, NULL, NULL);
+        free(command);
+
+        if (result->needs_tree_render) {
+            tree_render();
+        }
+        // allow_replay_pointer(event->time);
+        return;
+    }
+
     /* 1: see if the user scrolled on the decoration of a stacked/tabbed con */
     if (in_stacked && dest == CLICK_DECORATION && is_scroll) {
         DLOG("Scrolling on a window decoration\n");
@@ -424,7 +446,17 @@ void handle_button_press(xcb_button_press_event_t *event) {
     /* Check if the click was on the decoration of a child */
     if (con->window != NULL) {
         if (rect_contains(con->deco_rect, event->event_x, event->event_y)) {
-            route_click(con, event, CLICK_DECORATION);
+            Rect controls = {
+                .x = con->deco_rect.x + con->deco_rect.width - 50,
+                .y = con->deco_rect.y,
+                .width = 50,
+                .height = con->deco_rect.height
+            };
+
+            if ((con == focused || con_inside_focused(con)) && rect_contains(controls, event->event_x, event->event_y))
+                route_click(con, event, CLICK_WINDOW_CONTROL);
+            else
+                route_click(con, event, CLICK_DECORATION);
             return;
         }
     } else {
@@ -434,7 +466,19 @@ void handle_button_press(xcb_button_press_event_t *event) {
                 continue;
             }
 
-            route_click(child, event, CLICK_DECORATION);
+            Rect controls = {
+                .x = child->deco_rect.x + child->deco_rect.width - 50,
+                .y = child->deco_rect.y,
+                .width = 50,
+                .height = child->deco_rect.height
+            };
+
+            if ( (child == focused || con_inside_focused(child))
+                && child->deco_rect.width > 120
+                && rect_contains(controls, event->event_x, event->event_y))
+                route_click(child, event, CLICK_WINDOW_CONTROL);
+            else
+                route_click(child, event, CLICK_DECORATION);
             return;
         }
     }

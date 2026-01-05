@@ -59,6 +59,13 @@ struct Colortriple {
     color_t child_border;
 };
 
+struct Fattriple {
+    color_t base;
+    color_t light;
+    color_t dark_outer;
+    color_t dark_inner;
+};
+
 /**
  * Holds a user-assigned variable for parsing the configuration file. The key
  * is replaced by value in every following line of the file.
@@ -224,6 +231,11 @@ struct Config {
     /** The default border style for new floating windows. */
     border_style_t default_floating_border;
 
+    bool default_border_fat;
+    bool default_floating_border_fat;
+
+    bool spawn_floating;
+
     /** The modifier which needs to be pressed in combination with your mouse
      * buttons to do things with floating windows (move, resize) */
     uint32_t floating_modifier;
@@ -248,11 +260,22 @@ struct Config {
         struct Colortriple placeholder;
         bool got_focused_tab_title;
     } client;
+
+    color_t window_controls_color;
+    bool show_window_controls;
+
     struct config_bar {
         struct Colortriple focused;
         struct Colortriple unfocused;
         struct Colortriple urgent;
     } bar;
+
+    struct config_fat_border {
+        struct Fattriple focused;
+        struct Fattriple focused_inactive;
+        struct Fattriple unfocused;
+        struct Fattriple urgent;
+    } fat_border;
 
     /** What should happen when a new popup is opened during fullscreen mode */
     enum {
