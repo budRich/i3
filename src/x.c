@@ -360,27 +360,192 @@ void x_window_kill(xcb_window_t window, kill_window_t kill_window) {
 static void x_draw_title_border(Con *con, struct deco_render_params *p, surface_t *dest_surface) {
     Rect *dr = &(con->deco_rect);
 
-    /* Left */
-    draw_util_rectangle(dest_surface, p->color->border,
-                        dr->x, dr->y, 1, dr->height);
+    if (p->con_is_fat) {
 
-    /* Right */
-    draw_util_rectangle(dest_surface, p->color->border,
-                        dr->x + dr->width - 1, dr->y, 1, dr->height);
+        if (con->parent->layout == L_TABBED && con_num_children(con->parent) > 1) {
 
-    /* Top */
-    draw_util_rectangle(dest_surface, p->color->border,
+            Con *lefter = TAILQ_PREV(con, nodes_head, nodes);
+            Con *righter = TAILQ_NEXT(con, nodes);
+
+            /* Bottom is always single pixel base */
+            draw_util_rectangle(dest_surface, p->fat_color->base,
+                                dr->x, dr->y + dr->height - 1, dr->width, 1);
+
+            if (lefter && lefter->parent == con->parent) {
+
+                /* left - pixel tab separator in border color */
+                draw_util_rectangle(dest_surface, p->color->border,
+                                    dr->x, dr->y + 3, 1, dr->height - 4);
+
+                if (righter && righter->parent == con->parent) {
+                    /* Middle tab */
+                    /* Top - full width 3D */
+                    draw_util_rectangle(dest_surface, p->fat_color->base,
                         dr->x, dr->y, dr->width, 1);
+                    draw_util_rectangle(dest_surface, p->fat_color->light,
+                        dr->x, dr->y + 1, dr->width, 1);
+                    draw_util_rectangle(dest_surface, p->fat_color->base,
+                        dr->x, dr->y + 2, dr->width, 1);
 
-    /* Bottom */
-    draw_util_rectangle(dest_surface, p->color->border,
-                        dr->x, dr->y + dr->height - 1, dr->width, 1);
+
+                } else {
+                    /* rightmost tab */
+
+                    /* Right - 3D */
+                    draw_util_rectangle(dest_surface, p->fat_color->dark_outer,
+                                        dr->x + dr->width - 1, dr->y, 1, dr->height);
+                    draw_util_rectangle(dest_surface, p->fat_color->dark_inner,
+                                        dr->x + dr->width - 2, dr->y, 1, dr->height);
+                    draw_util_rectangle(dest_surface, p->fat_color->base,
+                                        dr->x + dr->width - 3, dr->y, 1, dr->height);
+
+                    /* Top - 3D */
+                    draw_util_rectangle(dest_surface, p->fat_color->base,
+                        dr->x, dr->y, dr->width - 1, 1);
+                    draw_util_rectangle(dest_surface, p->fat_color->light,
+                        dr->x, dr->y + 1, dr->width - 2, 1);
+                    draw_util_rectangle(dest_surface, p->fat_color->base,
+                        dr->x, dr->y + 2, dr->width - 3, 1);
+                }
+            } else {
+                /* This is the leftmost tab */
+
+                /* Top - 3D */
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                    dr->x, dr->y, dr->width, 1);
+                draw_util_rectangle(dest_surface, p->fat_color->light,
+                    dr->x + 1, dr->y + 1, dr->width - 1, 1);
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                    dr->x + 2, dr->y + 2, dr->width - 2, 1);
+
+                /* Left - 3D */
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                                    dr->x, dr->y, 1, dr->height);
+                draw_util_rectangle(dest_surface, p->fat_color->light,
+                                    dr->x + 1, dr->y + 1, 1, dr->height - 1);
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                                    dr->x + 2, dr->y + 2, 1, dr->height - 2);
+            }
+        }
+
+        else if (con->parent->layout == L_STACKED && con_num_children(con->parent) > 1) {
+            /* Left */
+            Con *above = TAILQ_PREV(con, nodes_head, nodes);
+            Con *below = TAILQ_NEXT(con, nodes);
+
+            if (above && above->parent == con->parent) {
+
+                /* top - pixel "separator" in normal border color */
+                draw_util_rectangle(dest_surface, p->color->border,
+                                    dr->x + 3, dr->y, dr->width - 6, 1);
+
+                /* left|right - full height 3D */
+                /* Left */
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                                    dr->x, dr->y, 1, dr->height);
+                draw_util_rectangle(dest_surface, p->fat_color->light,
+                                    dr->x + 1, dr->y, 1, dr->height);
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                                    dr->x + 2, dr->y, 1, dr->height);
+
+                /* Right */
+                draw_util_rectangle(dest_surface, p->fat_color->dark_outer,
+                                    dr->x + dr->width - 1, dr->y, 1, dr->height);
+                draw_util_rectangle(dest_surface, p->fat_color->dark_inner,
+                                    dr->x + dr->width - 2, dr->y, 1, dr->height);
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                                    dr->x + dr->width - 3, dr->y, 1, dr->height);
+
+                if (!(below && below->parent == con->parent)) {
+                    /* bottom stack */
+                    /* Bottom */
+                    draw_util_rectangle(dest_surface, p->fat_color->base,
+                                        dr->x + 2, dr->y + dr->height - 1, dr->width - 4, 1);
+                }
+            } else {
+                /* This is the topmost stack  */
+
+                /* Left */
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                                    dr->x, dr->y, 1, dr->height);
+                draw_util_rectangle(dest_surface, p->fat_color->light,
+                                    dr->x + 1, dr->y, 1, dr->height);
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                                    dr->x + 2, dr->y, 1, dr->height);
+
+                /* Right */
+                draw_util_rectangle(dest_surface, p->fat_color->dark_outer,
+                                    dr->x + dr->width - 1, dr->y, 1, dr->height);
+                draw_util_rectangle(dest_surface, p->fat_color->dark_inner,
+                                    dr->x + dr->width - 2, dr->y, 1, dr->height);
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                                    dr->x + dr->width - 3, dr->y, 1, dr->height);
+
+                /* Top */
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                    dr->x, dr->y, dr->width - 1, 1);
+                draw_util_rectangle(dest_surface, p->fat_color->light,
+                    dr->x + 1, dr->y + 1, dr->width - 3, 1);
+                draw_util_rectangle(dest_surface, p->fat_color->base,
+                    dr->x + 2, dr->y + 2, dr->width - 4, 1);
+            }
+        } else {
+
+            /* "normal" full 3D border */
+
+            /* Left */
+            draw_util_rectangle(dest_surface, p->fat_color->base,
+                                dr->x, dr->y, 1, dr->height);
+            draw_util_rectangle(dest_surface, p->fat_color->light,
+                                dr->x + 1, dr->y, 1, dr->height);
+            draw_util_rectangle(dest_surface, p->fat_color->base,
+                                dr->x + 2, dr->y, 1, dr->height);
+
+            /* Right */
+            draw_util_rectangle(dest_surface, p->fat_color->dark_outer,
+                                dr->x + dr->width - 1, dr->y, 1, dr->height);
+            draw_util_rectangle(dest_surface, p->fat_color->dark_inner,
+                                dr->x + dr->width - 2, dr->y, 1, dr->height);
+            draw_util_rectangle(dest_surface, p->fat_color->base,
+                                dr->x + dr->width - 3, dr->y, 1, dr->height);
+
+            /* Top */
+            draw_util_rectangle(dest_surface, p->fat_color->base,
+                dr->x, dr->y, dr->width - 1, 1);
+            draw_util_rectangle(dest_surface, p->fat_color->light,
+                dr->x + 1, dr->y + 1, dr->width - 3, 1);
+            draw_util_rectangle(dest_surface, p->fat_color->base,
+                dr->x + 2, dr->y + 2, dr->width - 4, 1);
+
+            /* Bottom */
+            draw_util_rectangle(dest_surface, p->fat_color->base,
+                                dr->x + 2, dr->y + dr->height - 1, dr->width - 4, 1);
+        }
+
+    } else {
+        /* Left */
+        draw_util_rectangle(dest_surface, p->color->border,
+                            dr->x, dr->y, 1, dr->height);
+
+        /* Right */
+        draw_util_rectangle(dest_surface, p->color->border,
+                            dr->x + dr->width - 1, dr->y, 1, dr->height);
+
+        /* Top */
+        draw_util_rectangle(dest_surface, p->color->border,
+                            dr->x, dr->y, dr->width, 1);
+
+        /* Bottom */
+        draw_util_rectangle(dest_surface, p->color->border,
+                            dr->x, dr->y + dr->height - 1, dr->width, 1);
+    }
 }
 
 static void x_draw_decoration_after_title(Con *con, struct deco_render_params *p, surface_t *dest_surface) {
     assert(con->parent != NULL);
 
     Rect *dr = &(con->deco_rect);
+    double btnSize =  10;
 
     /* Redraw the right border to cut off any text that went past it.
      * This is necessary when the text was drawn using XCB since cutting text off
@@ -394,6 +559,35 @@ static void x_draw_decoration_after_title(Con *con, struct deco_render_params *p
                             dr->y,
                             2 * logical_px(1),
                             dr->height);
+    }
+
+    // draw window controls
+    if  (p->show_window_controls && dr->width > 120) {
+        // close
+        draw_util_cross(dest_surface, config.window_controls_color, 2,
+            dr->x + dr->width - btnSize - 5,
+            dr->y + 6,
+            btnSize - 1,
+            btnSize - 1);
+
+        // restore
+        draw_util_rectangle(dest_surface, config.window_controls_color,
+                            dr->x + dr->width - 2 * btnSize - 2 * 5,
+                            dr->y + 6,
+                            btnSize,
+                            btnSize);
+        draw_util_rectangle(dest_surface, p->color->background,
+                            dr->x + 1 + dr->width - 2 * btnSize - 2 * 5,
+                            dr->y + 6 + 3,
+                            btnSize - 2,
+                            btnSize - 4);
+
+        // minimize
+        draw_util_rectangle(dest_surface, config.window_controls_color,
+                            dr->x + dr->width - 3 * btnSize - 3 * 5,
+                            dr->y + btnSize + 2,
+                            btnSize,
+                            3);
     }
 
     /* Redraw the border. */
@@ -492,20 +686,28 @@ void x_draw_decoration(Con *con) {
     /* 1: build deco_params and compare with cache */
     struct deco_render_params *p = scalloc(1, sizeof(struct deco_render_params));
 
+    /* TODO: for different styles of fatborders to work well
+             a redesign of how borders on tabbed/stacked containers are needed..
+             therefor fat border style is currently always "focused". */
+
     /* find out which colors to use */
     if (con->urgent) {
         p->color = &config.client.urgent;
+        p->fat_color = &config.fat_border.focused;
     } else if (con == focused || con_inside_focused(con)) {
         p->color = &config.client.focused;
+        p->fat_color = &config.fat_border.focused;
     } else if (con == TAILQ_FIRST(&(parent->focus_head))) {
         if (config.client.got_focused_tab_title && !leaf && con_descend_focused(con) == focused) {
             /* Stacked/tabbed parent of focused container */
             p->color = &config.client.focused_tab_title;
         } else {
             p->color = &config.client.focused_inactive;
+            p->fat_color = &config.fat_border.focused;
         }
     } else {
         p->color = &config.client.unfocused;
+        p->fat_color = &config.fat_border.focused;
     }
 
     p->border_style = con_border_style(con);
@@ -518,6 +720,10 @@ void x_draw_decoration(Con *con) {
     p->background = config.client.background;
     p->con_is_leaf = con_is_leaf(con);
     p->parent_layout = con->parent->layout;
+    p->show_window_controls = (con == focused && config.show_window_controls);
+    p->con_is_fat = con->parent->type != CT_FLOATING_CON
+                        ? config.default_border_fat
+                        : config.default_floating_border_fat;
 
     if (con->deco_render_params != NULL &&
         (con->window == NULL || !con->window->name_x_changed) &&
@@ -566,17 +772,59 @@ void x_draw_decoration(Con *con) {
 
     /* 3: draw a rectangle in border color around the client */
     if (p->border_style != BS_NONE && p->con_is_leaf) {
-        /* Fill the border. We don’t just fill the whole rectangle because some
-         * children are not freely resizable and we want their background color
-         * to "shine through". */
-        xcb_rectangle_t rectangles[4];
-        size_t rectangles_count = x_get_border_rectangles(con, rectangles);
-        for (size_t i = 0; i < rectangles_count; i++) {
-            draw_util_rectangle(&(con->frame_buffer), p->color->child_border,
-                                rectangles[i].x,
-                                rectangles[i].y,
-                                rectangles[i].width,
-                                rectangles[i].height);
+        if (p->con_is_fat) {
+
+            int border_style = con_border_style(con);
+            adjacent_t borders_to_hide = con_adjacent_borders(con) & config.hide_edge_borders;
+            Rect bra = con_border_style_rect(con);
+
+            if (!(borders_to_hide & ADJ_LEFT_SCREEN_EDGE)) {
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->base,
+                                    0, 0, 1, con->rect.height);
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->light,
+                                    1, 0, 1, con->rect.height);
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->base,
+                                    2, 0, 1, con->rect.height);
+            }
+            if (!(borders_to_hide & ADJ_RIGHT_SCREEN_EDGE)) {
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->base,
+                                    con->rect.width + (bra.width + bra.x), 0, 1, con->rect.height);
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->dark_inner,
+                                    con->rect.width + (bra.width + bra.x) + 1, 0, 1, con->rect.height);
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->dark_outer,
+                                    con->rect.width + (bra.width + bra.x) + 2, 0, 1, con->rect.height);
+
+            }
+            if (!(borders_to_hide & ADJ_LOWER_SCREEN_EDGE)) {
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->base,
+                                    bra.x, con->rect.height + (bra.height + bra.y), con->rect.width + bra.width, 1);
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->dark_inner,
+                                    bra.x - 2, con->rect.height + (bra.height + bra.y) + 1, con->rect.width + bra.width + 4, 1);
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->dark_outer,
+                                    bra.x - 3, con->rect.height + (bra.height + bra.y) + 2, con->rect.width + bra.width + 6, 1);
+            }
+
+            if (border_style == BS_PIXEL && !(borders_to_hide & ADJ_UPPER_SCREEN_EDGE)) {
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->base,
+                    bra.x - 2, 0, con->rect.width + bra.width + 4, 1);
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->light,
+                    bra.x - 1, 1, con->rect.width + bra.width + 2, 1);
+                draw_util_rectangle(&(con->frame_buffer), p->fat_color->base,
+                    bra.x, 2, con->rect.width + bra.width, 1);
+            }
+        } else {
+            /* Fill the border. We don’t just fill the whole rectangle because some
+             * children are not freely resizable and we want their background color
+             * to "shine through". */
+            xcb_rectangle_t rectangles[4];
+            size_t rectangles_count = x_get_border_rectangles(con, rectangles);
+            for (size_t i = 0; i < rectangles_count; i++) {
+                draw_util_rectangle(&(con->frame_buffer), p->color->child_border,
+                                    rectangles[i].x,
+                                    rectangles[i].y,
+                                    rectangles[i].width,
+                                    rectangles[i].height);
+            }
         }
 
         /* Highlight the side of the border at which the next window will be
@@ -640,7 +888,7 @@ void x_draw_decoration(Con *con) {
     struct Window *win = con->window;
 
     const int deco_width = (int)con->deco_rect.width;
-    const int title_padding = logical_px(2);
+    const int title_padding = logical_px( p->con_is_fat ? 4 : 2 );
 
     int mark_width = 0;
     if (config.show_marks && !TAILQ_EMPTY(&(con->marks_head))) {
@@ -749,7 +997,7 @@ void x_draw_decoration(Con *con) {
                    p->color->text, p->color->background,
                    con->deco_rect.x + title_offset_x,
                    con->deco_rect.y + text_offset_y,
-                   deco_width - mark_width - 2 * title_padding - total_icon_space);
+                   deco_width - mark_width - 2 * title_padding - total_icon_space - (deco_width > 120 ? 40 : 0));
     if (has_icon) {
         draw_util_image(
             win->icon,
