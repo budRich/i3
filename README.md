@@ -1,3 +1,9 @@
+# MAINTAINED AT https://git.budlabs.xyz/bud/xfce4-bwp-plugin
+
+-----
+
+
+
 ![Logo](docs/logo-30.png) i3: A tiling window manager
 =====================================================
 
