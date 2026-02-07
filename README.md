@@ -1,4 +1,4 @@
-# MAINTAINED AT https://git.budlabs.xyz/bud/xfce4-bwp-plugin
+# MAINTAINED AT https://git.budlabs.xyz/bud/i3-wm-bud
 
 -----
 
